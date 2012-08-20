@@ -19,9 +19,9 @@ Further details and idiot-level step by step instructions:
     [percent]         -	optional, default=100. Should be in the format 1-100 where 20 => 20% of threads will be run by the script.
     [setup]           -	optional, default=TRUE. Set to "FALSE" if a pre-defined host is being used that has already been setup (had files copied to it, jmeter installed, etc.)
     [terminate]       -	optional, default=TRUE. Set to "FALSE" if the instances created should not be terminated.
-    [env]             -	optional, this is only used in db_mode where this text is written against the results
-    [release]         -	optional, this is only used in db_mode where this text is written against the results
-    [comment]         -	optional, this is only used in db_mode where this text is written against the results
+    [env]             -	optional, this is only used in db_mode where this text is written against the results.
+    [release]         -	optional, this is only used in db_mode where this text is written against the results.
+    [comment]         -	optional, this is only used in db_mode where this text is written against the results.
 
 
 **If the property REMOTE_HOSTS is set to one or more hostnames then the NUMBER OF INSTANCES value is ignored and the given REMOTE_HOSTS will be used in place of creating new hardware on Amazon.*
