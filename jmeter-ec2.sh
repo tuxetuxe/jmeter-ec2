@@ -521,7 +521,7 @@ function runsetup() {
 	    fi
 	
 	    # scp any project specific custom jar files
-	    if [ -d $LOCAL_HOME/$project/plugins ] && [ -n $(ls $LOCAL_HOME/$project/plugins/) ] ; then # don't try to upload any files if none present
+	    if [ -d $LOCAL_HOME/$project/plugins ] && [ -n "$(ls $LOCAL_HOME/$project/plugins/)" ] ; then # don't try to upload any files if none present
 	        echo -n "project specific jar file(s)..."
 	        for host in ${hosts[@]} ; do
 	            (scp -q -C -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
@@ -596,7 +596,7 @@ function runtest() {
     # sleep_interval - how often we poll the jmeter output for results
     # this value should be the same as the Generate Summary Results interval set in jmeter.properties
     # to be certain, we read the value in here and adjust the wait to match (this prevents lots of duplicates being written to the screen)
-    sleep_interval=$(awk 'BEGIN { FS = "\=" } ; /summariser.interval/ {print $2}' $LOCAL_HOME/jmeter.properties)
+    sleep_interval=$(awk 'BEGIN { FS = "=" } ; /summariser.interval/ {print $2}' $LOCAL_HOME/jmeter.properties)
     runningtotal_seconds=$(echo "$RUNNINGTOTAL_INTERVAL * $sleep_interval" | bc)
 	# $epoch is used when importing to mysql (if enabled) because we want unix timestamps, not datetime, as this works better when graphing.
 	epoch_seconds=$(date +%s) 
@@ -810,10 +810,10 @@ function runcleanup() {
 	fi
 	
 	# Tidy up
-    rm $LOCAL_HOME/$project/$project-$DATETIME-grouped.jtl
-    rm $LOCAL_HOME/$project/$project-$DATETIME-sorted.jtl
-    rm $LOCAL_HOME/$project/$project-$DATETIME-appended.jtl
-    rm $LOCAL_HOME/$project/$project-$DATETIME-noblanks.jtl
+    rm $LOCAL_HOME/$project/$project-$DATETIME-grouped.jtl 2> /dev/null
+    rm $LOCAL_HOME/$project/$project-$DATETIME-sorted.jtl 2> /dev/null
+    rm $LOCAL_HOME/$project/$project-$DATETIME-appended.jtl 2> /dev/null
+    rm $LOCAL_HOME/$project/$project-$DATETIME-noblanks.jtl 2> /dev/null
     mkdir -p $LOCAL_HOME/$project/results/
     mv $LOCAL_HOME/$project/$project-$DATETIME-complete.jtl $LOCAL_HOME/$project/results/
 	
