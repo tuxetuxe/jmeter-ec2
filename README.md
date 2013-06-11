@@ -122,12 +122,12 @@ Where 'someproject' is the name of the project directory (and jmx file) and '1' 
 
 4. Sort command: You will probably need make sure sort is resolved in the script to the Cygwin version and not the Windows one. It may be done through an alias defined in your jmeter-ec2.properties for example:
 
-    if [ -n "$(uname -a | grep CYGWIN)" ]
-    then
-        shopt -s expand_aliases
-        alias sort=/usr/bin/sort
-        echo "(CYGWIN) Aliased explicitely sort to /usr/bin/sort"
-    fi
+        if [ -n "$(uname -a | grep CYGWIN)" ]
+        then
+            shopt -s expand_aliases
+            alias sort=/usr/bin/sort
+            echo "(CYGWIN) Aliased explicitely sort to /usr/bin/sort"
+        fi
 
 
 ## Notes:
