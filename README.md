@@ -12,13 +12,14 @@ Further details and idiot-level step by step instructions:
     [http://www.http503.com/2012/jmeter-ec2/](http://www.http503.com/2012/jmeter-ec2/)
 
 ## Usage:
-    project="abc" percent=20 count="3" terminate="TRUE" setup="TRUE" env="UAT" release="3.23" comment="my notes" ./jmeter-ec2.sh'
+    project="abc" percent=20 count="3" terminate="TRUE" setup="TRUE" debug="TRUE" env="UAT" release="3.23" comment="my notes" ./jmeter-ec2.sh'
 
     [project]         -	required, directory and jmx name
     [count]           -	optional, default=1 
     [percent]         -	optional, default=100. Should be in the format 1-100 where 20 => 20% of threads will be run by the script.
     [setup]           -	optional, default=TRUE. Set to "FALSE" if a pre-defined host is being used that has already been setup (had files copied to it, jmeter installed, etc.)
     [terminate]       -	optional, default=TRUE. Set to "FALSE" if the instances created should not be terminated.
+	[debug]           - optional, default=FALSE. Set to TRUE to keep intermediary results, work files and logs.
     [env]             -	optional, this is only used in db_mode where this text is written against the results
     [release]         -	optional, this is only used in db_mode where this text is written against the results
     [comment]         -	optional, this is only used in db_mode where this text is written against the results
@@ -110,6 +111,22 @@ IMPORTANT - There is a limit imposed by Amazon on how many instances can be run 
 
 Where 'someproject' is the name of the project directory (and jmx file) and '1' is the number of instances you wish to spread the test over. If you have provided a list of hosts using REMOTE_HOSTS then this value is ignored and all hosts in the list will be used.
 
+
+## Additional instructions (Cygwin)
+
+1. Rights: Make sure that the whole jmeter-ec2 tree on your system has the correct rights. If you don't want to have problems, directories and .sh should have u+rwx and everything else u+rw. The script does not edit rights after upload on the instances.
+
+2. Tools: jmeter-ec2.sh requires awk and bc installed.
+
+3. Paths: Use only Cygwin style paths in AWS EC2 tools setup and jmeter-ec2.properties.
+
+4. Sort command: You will probably need make sure sort is resolved in the script to the Cygwin version and not the Windows one. It may be done through an alias defined in your jmeter-ec2.properties for example:
+	if [ -n "$(uname -a | grep CYGWIN)" ]
+	then
+		shopt -s expand_aliases
+		alias sort=/usr/bin/sort
+		echo "(CYGWIN) Aliased explicitely sort to /usr/bin/sort"
+	fi
 
 ## Notes:
 ### Your PEM File
