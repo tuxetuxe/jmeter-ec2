@@ -28,14 +28,15 @@ DATETIME=$(date "+%s")
 if [ -z "$project" ] ; then
 	echo "jmeter-ec2: Required parameter 'project' missing"
 	echo
-	echo 'usage: project="abc" percent=20 setup="TRUE" terminate="TRUE" count="3" env="UAT" release="3.23" comment="my notes" ./jmeter-ec2.sh'
+	echo 'usage: project="abc" percent=20 install="TRUE" setup="TRUE" terminate="TRUE" count="3" env="UAT" release="3.23" comment="my notes" ./jmeter-ec2.sh'
 	echo
 	echo "[project]         -	required, directory and jmx name"
-	echo "[count]           -	optional, default=1"
-	echo "[percent]         -	optional, default=100"
-	echo "[setup]           -	optional, default='TRUE'"
-	echo "[terminate]       -	optional, default='TRUE'"
-	echo "[debug]           -   optional, default='FALSE'"
+	echo "[count]           -	optional, number of instances to spawn, default=1"
+	echo "[percent]         -	optional, percent of threads to start, default=100"
+	echo "[install]         -	optional, install java/jmeter, default='FALSE'"
+	echo "[setup]           -	optional, upload properties files etc., default='TRUE'"
+	echo "[terminate]       -	optional, terminate instances when done, default='TRUE'"
+	echo "[debug]           -	optional, more logs, default='FALSE'"
 	echo "[env]             -	optional"
 	echo "[release]         -	optional"
 	echo "[comment]         -	optional"
@@ -50,6 +51,9 @@ if [ -z "$comment" ] ; then comment="-" ; fi
 
 # default to 100 if percent is not specified
 if [ -z "$percent" ] ; then percent=100 ; fi
+
+# default to FALSE if install is not specified
+if [ -z "$install" ] ; then install="FALSE" ; fi
 	
 # default to TRUE if setup is not specified
 if [ -z "$setup" ] ; then setup="TRUE" ; fi
@@ -288,7 +292,7 @@ function runsetup() {
     fi
 	
     # scp install.sh
-    if [ "$setup" = "TRUE" ] ; then
+    if [ "$install" = "TRUE" ] ; then
     	echo -n "copying install.sh to $instance_count server(s)..."
 	    for host in ${hosts[@]} ; do
 	        (scp -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
@@ -527,12 +531,12 @@ function runsetup() {
 	    fi
     
 	    # scp jmeter execution file
-	    if [ -r $LOCAL_HOME/jmeter ] ; then # don't try to upload this optional file if it is not present
-	        echo -n "jmeter execution file..."
+	    if [ -r $LOCAL_HOME/jmeter.sh ] ; then # don't try to upload this optional file if it is not present
+	        echo -n "jmeter.sh execution file..."
 	        for host in ${hosts[@]} ; do
 	            (scp -q -C -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
 	                                          -i $PEM_PATH/$PEM_FILE \
-	                                          $LOCAL_HOME/jmeter $LOCAL_HOME/jmeter \
+	                                          $LOCAL_HOME/jmeter.sh \
 	                                          $USER@$host:$REMOTE_HOME/$JMETER_VERSION/bin/) &
 	        done
 	        wait
