@@ -853,9 +853,9 @@ function runcleanup() {
 	start_time=$(head -1 $PROJECT_WORK/$project-$DATETIME-complete.jtl | cut -d',' -f2)
 	end_time=$(tail -1 $PROJECT_WORK/$project-$DATETIME-complete.jtl | cut -d',' -f2)
 	duration=$(echo "$end_time-$start_time" | bc)
-	if [ ! (($duration > 0)) ] ; then
+	if [ "$duration" -lt "0" ] ; then
 		duration=0;
-	fi	
+	fi
 	
 	if [ ! -z "$DB_HOST" ] ; then
 		# mark test as complete in database
