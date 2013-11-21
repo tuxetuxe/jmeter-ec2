@@ -561,14 +561,27 @@ function runsetup() {
 	        echo -n "done...."
 	    fi
 	
-	    # scp any project specific custom jar files
+	    # scp any project specific plugin files
 	    if [ -d $LOCAL_HOME/$project/plugins ] && [ -n $(ls $LOCAL_HOME/$project/plugins/) ] ; then # don't try to upload any files if none present
-	        echo -n "project specific jar file(s)..."
+	        echo -n "uploading project plugin file(s)..."
 	        for host in ${hosts[@]} ; do
 	            (scp -q -C -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
 	                                          -i $PEM_PATH/$PEM_FILE -P $REMOTE_PORT \
 	                                          $LOCAL_HOME/$project/plugins/*.jar \
 	                                          $USER@$host:$REMOTE_HOME/$JMETER_VERSION/lib/ext/) &
+	        done
+	        wait
+	        echo -n "done...."
+	    fi
+	
+	    # scp any project specific lib files
+	    if [ -d $LOCAL_HOME/$project/lib ] && [ -n $(ls $LOCAL_HOME/$project/lib/) ] ; then # don't try to upload any files if none present
+	        echo -n "uploading project lib file(s)..."
+	        for host in ${hosts[@]} ; do
+	            (scp -q -C -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+	                                          -i $PEM_PATH/$PEM_FILE -P $REMOTE_PORT \
+	                                          $LOCAL_HOME/$project/lib/*.jar \
+	                                          $USER@$host:$REMOTE_HOME/$JMETER_VERSION/lib/) &
 	        done
 	        wait
 	        echo -n "done...."
