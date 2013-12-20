@@ -9,11 +9,54 @@
 REMOTE_HOME=$1
 INSTALL_JAVA=$2
 JMETER_VERSION=$3
-
+JMETER_PLUGINS_VERSION=$4
 
 function install_jmeter_plugins() {
     wget -q -O $REMOTE_HOME/JMeterPlugins.jar https://s3.amazonaws.com/jmeter-ec2/JMeterPlugins.jar
     mv $REMOTE_HOME/JMeterPlugins.jar $REMOTE_HOME/$JMETER_VERSION/lib/ext/
+    
+    #install jmeter plugins from jmeter-plugins.org
+    wget -q -O $REMOTE_HOME/JMeterPlugins-Standard-$JMETER_PLUGINS_VERSION.zip http://jmeter-plugins.org/downloads/file/JMeterPlugins-Standard-$JMETER_PLUGINS_VERSION.zip
+    unzip $REMOTE_HOME/JMeterPlugins-Standard-$JMETER_PLUGINS_VERSION.zip -d $REMOTE_HOME/JMeterPlugins-Standard-$JMETER_PLUGINS_VERSION/
+    rsync -a $REMOTE_HOME/JMeterPlugins-Standard-$JMETER_PLUGINS_VERSION/ $REMOTE_HOME/$JMETER_VERSION/
+    
+    wget -q -O $REMOTE_HOME/JMeterPlugins-Extras-$JMETER_PLUGINS_VERSION.zip http://jmeter-plugins.org/downloads/file/JMeterPlugins-Extras-$JMETER_PLUGINS_VERSION.zip
+    unzip $REMOTE_HOME/JMeterPlugins-Extras-$JMETER_PLUGINS_VERSION.zip -d $REMOTE_HOME/JMeterPlugins-Extras-$JMETER_PLUGINS_VERSION/
+    rsync -a $REMOTE_HOME/JMeterPlugins-Extras-$JMETER_PLUGINS_VERSION/ $REMOTE_HOME/$JMETER_VERSION/
+    
+    wget -q -O $REMOTE_HOME/JMeterPlugins-ExtrasLibs-$JMETER_PLUGINS_VERSION.zip http://jmeter-plugins.org/downloads/file/JMeterPlugins-ExtrasLibs-$JMETER_PLUGINS_VERSION.zip
+    unzip $REMOTE_HOME/JMeterPlugins-ExtrasLibs-$JMETER_PLUGINS_VERSION.zip -d $REMOTE_HOME/JMeterPlugins-ExtrasLibs-$JMETER_PLUGINS_VERSION/
+    rsync -a $REMOTE_HOME/JMeterPlugins-ExtrasLibs-$JMETER_PLUGINS_VERSION/ $REMOTE_HOME/$JMETER_VERSION/
+    
+    wget -q -O $REMOTE_HOME/JMeterPlugins-WebDriver-$JMETER_PLUGINS_VERSION.zip http://jmeter-plugins.org/downloads/file/JMeterPlugins-WebDriver-$JMETER_PLUGINS_VERSION.zip
+    unzip $REMOTE_HOME/JMeterPlugins-WebDriver-$JMETER_PLUGINS_VERSION.zip -d $REMOTE_HOME/JMeterPlugins-WebDriver-$JMETER_PLUGINS_VERSION/
+    rsync -a $REMOTE_HOME/JMeterPlugins-WebDriver-$JMETER_PLUGINS_VERSION/ $REMOTE_HOME/$JMETER_VERSION/
+    
+    wget -q -O $REMOTE_HOME/chromedriver_linux64.zip http://chromedriver.storage.googleapis.com/2.8/chromedriver_linux64.zip
+    mkdir -p $REMOTE_HOME/$JMETER_VERSION/drivers/chromedriver
+    unzip $REMOTE_HOME/chromedriver_linux64.zip -d $REMOTE_HOME/$JMETER_VERSION/drivers/chromedriver
+
+}
+
+function install_google_chrome(){
+	wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+	sudo dpkg -i google-chrome-stable_current_amd64.deb
+	sudo DEBIAN_FRONTEND=noninteractive apt-get -qqy -f install
+	wait
+}
+
+function install_xvfb(){
+	sudo DEBIAN_FRONTEND=noninteractive apt-get -qqy install xvfb xfonts-100dpi xfonts-75dpi xfonts-scalable
+	wait
+	
+	XVFB=/usr/bin/Xvfb
+	XVFBARGS=":1 -screen 0 1920x1200x24 -ac +extension GLX +render -noreset"
+	PIDFILE=/var/run/xvfb.pid
+
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile --background --exec $XVFB -- $XVFBARGS
+	
+	export DISPLAY=:99
+	
 }
 
 function install_mysql_driver() {
@@ -24,6 +67,10 @@ function install_mysql_driver() {
 
 cd $REMOTE_HOME
 
+#install utilities
+sudo DEBIAN_FRONTEND=noninteractive apt-get -qqy install unzip
+wait
+
 if [ $INSTALL_JAVA -eq 1 ] ; then
     # install java
 	
@@ -31,18 +78,6 @@ if [ $INSTALL_JAVA -eq 1 ] ; then
 	sudo apt-get update #update apt-get
 	sudo DEBIAN_FRONTEND=noninteractive apt-get -qqy install default-jre
 	wait
-
-#    bits=`getconf LONG_BIT`
-#    if [ $bits -eq 32 ] ; then
-#        wget -q -O $REMOTE_HOME/jre-6u30-linux-i586-rpm.bin https://s3.amazonaws.com/jmeter-ec2/jre-6u30-linux-i586-rpm.bin
-#        chmod 755 $REMOTE_HOME/jre-6u30-linux-i586-rpm.bin
-#        $REMOTE_HOME/jre-6u30-linux-i586-rpm.bin
-#    else # 64 bit
-#        wget -q -O $REMOTE_HOME/jre-6u30-linux-x64-rpm.bin https://s3.amazonaws.com/jmeter-ec2/jre-6u30-linux-i586-rpm.bin
-#        chmod 755 $REMOTE_HOME/jre-6u30-linux-x64-rpm.bin
-#        $REMOTE_HOME/jre-6u30-linux-x64-rpm.bin
-#    fi
-
 fi
 
 # install jmeter
@@ -56,6 +91,8 @@ jakarta-jmeter-2.5.1)
     install_jmeter_plugins
     # install mysql jdbc driver
 	install_mysql_driver
+	install_google_chrome
+	install_xvfb
     ;;
 
 apache-jmeter-*)
@@ -66,6 +103,8 @@ apache-jmeter-*)
     install_jmeter_plugins
     # install mysql jdbc driver
 	install_mysql_driver
+	install_google_chrome
+	install_xvfb
     ;;
     
 *)

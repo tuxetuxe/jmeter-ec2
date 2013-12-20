@@ -152,7 +152,7 @@ function runsetup() {
         attempted_instanceids=(`ec2-run-instances \
 		            --key $AMAZON_KEYPAIR_NAME \
                     -t $INSTANCE_TYPE \
-                    -g $INSTANCE_SECURITYGROUP \
+                    -g "$INSTANCE_SECURITYGROUP" \
                     -n 1-$instance_count \
 		            --region $REGION \
                     --availability-zone \
@@ -178,7 +178,7 @@ function runsetup() {
         
         # wait for each instance to be fully operational
         status_check_count=0
-        status_check_limit=45
+        status_check_limit=91
         status_check_limit=`echo "$status_check_limit + $countof_instanceids" | bc` # increase wait time based on instance count
         echo -n "waiting for instance status checks to pass (this can take several minutes)..."
         count_passed=0
@@ -187,7 +187,7 @@ function runsetup() {
             echo -n .
             status_check_count=$(( $status_check_count + 1))
             count_passed=$(ec2-describe-instance-status --region $REGION ${attempted_instanceids[@]} | awk '/INSTANCESTATUS/ {print $3}' | grep -c passed)
-            sleep 3
+            sleep 10
         done
         
         if [ $status_check_count -lt $status_check_limit ] ; then # all hosts started ok because count_passed==instance_count
@@ -338,7 +338,7 @@ function runsetup() {
 	    for host in ${hosts[@]} ; do
 	        (ssh -nq -o StrictHostKeyChecking=no \
 	            -i $PEM_PATH/$PEM_FILE $USER@$host -p $REMOTE_PORT \
-	            "$REMOTE_HOME/install.sh $REMOTE_HOME $attemptjavainstall $JMETER_VERSION"\
+	            "$REMOTE_HOME/install.sh $REMOTE_HOME $attemptjavainstall $JMETER_VERSION $JMETER_PLUGINS_VERSION"\
 	            > $LOCAL_HOME/$project/$DATETIME-$host-install.out) &
 	    done
     
